@@ -22,6 +22,7 @@ Run for each student:
 Config vars:
 """
 arguments = ""
+files_inside_folder = False #In some submissions, their java classes will be inside a folder, which is then inside the zip file; otherwise the files are just inside the zip file.
 base_stu_dir = "../" #The base directory, where all the students implementation is found (each folder has another folder with some name, that last folder is the one containing the java files)
 student_testing_sol_dir = "stu" #The name of the folder where the student's solution is found
 testing_dir = "src/poly/" #The root folder where the student's solution and where the correct and actual solution (the one provided by CS deparment) is found
@@ -30,6 +31,20 @@ output_dir = "../output/" #Where to save the output of the compile and run
 data_dir = "" #Directory containing some data files (usually .txt files)
 main = "src/PolyTest.java" #File to be compiled and run
 
+"""
+File copying function. Inside the given directory
+"""
+def copy_files(src_dir,dest_dir):
+	for file_name in os.listdir(src_dir):
+		"""
+		## COPYING ##
+		"""
+		full_file_name_src = os.path.join(src_dir, file_name)
+		full_file_name_dest = os.path.join(dest_dir, file_name)
+		shutil.copy(full_file_name_src, full_file_name_dest)
+
+
+
 
 
 for student_sol_dir in os.listdir(base_stu_dir):
@@ -37,18 +52,15 @@ for student_sol_dir in os.listdir(base_stu_dir):
 		#In myCourses the fileformat is numbers-morenums - Lastname,Firstname - student_sol_dir
 		student_fullname = student_sol_dir.strip().split("-")[2]
 		student_dir = base_stu_dir + student_sol_dir
-		#All the actual java files are inside one or multiple zip files or folders which are inside the main student dir
-		for ZipFolder in os.listdir(student_dir):
-			content_dir = os.path.join(student_dir, ZipFolder)
-			for file_name in os.listdir(content_dir):
-				"""
-				## COPYING ##
-				"""
+		#Check wether their files are inside another folder or if they are already inside the first unzipped folder
+		if(files_inside_folder):
+			for ZipFolder in os.listdir(student_dir):
+				source = os.path.join(student_dir, ZipFolder)
 				dest = testing_dir + student_testing_sol_dir
-				src = content_dir
-				full_file_name_src = os.path.join(src, file_name)
-				full_file_name_dest = os.path.join(dest, file_name)
-				shutil.copy(full_file_name_src, full_file_name_dest)
+				copy_files(source,dest)
+		else:
+				dest = testing_dir + student_testing_sol_dir
+				copy_files(student_dir,dest)
 		"""
 		## Compiling ##
 		"""
